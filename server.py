@@ -14,6 +14,14 @@ app = Flask(__name__, static_folder='views')
 def home():
   return render_template('index.html')
 
+
+@app.route("/api/random")
+def randomIndexResponse():
+  randomIndex = randint(0,12)
+  responseJSON = {"index": randomIndex}
+  return jsonify(responseJSON)
+
+
 # Public Directory:
 
 @app.route('/<path:path>', strict_slashes=False)
