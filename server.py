@@ -15,14 +15,21 @@ def home():
   return render_template('index.html')
 
 
-@app.route("/api/random", methods=['GET', 'POST'])
+@app.route("/api/random", methods=["GET"])
+def randomGet():
+  print("GET PING!")
+  return "Use POST"
+
+@app.route("/api/random", methods=["POST"])
 def randomIndexResponse():
   data = request.get_json()
+  print(data["handCards"]);
   legalCards = []
   for i in range(0, len(data["handCards"])):
     if (data["handCards"][i]["legal"] == True):
       legalCards.append(i)
-  randomIndex = randint(0,len(legalCards) - 1);
+      print(i)
+  randomIndex = legalCards[randint(0,len(legalCards) - 1)]
   responseJSON = {"index": randomIndex}
   return jsonify(responseJSON)
 
