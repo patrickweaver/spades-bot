@@ -61,7 +61,15 @@ def randomIndexResponse():
 @app.route("/api/trick-taker/", methods=["POST"])
 def logTrickWinner():
   data = request.get_json()
-  print(data["winnerId"]);
+  print(data["winnerId"])
+  return "OK"
+
+@app.route("/api/hand-score/", methods=["POST"])
+def logHandScore():
+  data = request.get_json()
+  print(data["scoreChange"])
+  print(data["bagsChange"])
+  print(data["playerId"])
   return "OK"
 
 
