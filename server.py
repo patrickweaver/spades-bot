@@ -23,9 +23,9 @@ def numberOfSpadesResponse():
   data = request.get_json()
   if data["strategy"] == "numberOfSpades":
     #print(data["handCards"])
-    for d in data:
-      print(d);
-    print("");
+    #for d in data:
+    #  print(d);
+    #print("");
     spades = 0;
     for i in range(0, len(data["handCards"])):
       if (data["handCards"][i]["suitName"] == "spades"):
@@ -45,9 +45,9 @@ def randomIndexResponse():
   data = request.get_json()
   if data["strategy"] == "random":
     #print(data["handCards"])
-    for d in data:
-      print(d);
-    print("");
+    #for d in data:
+    #  print(d);
+    #print("");
     legalCards = []
     for i in range(0, len(data["handCards"])):
       if (data["handCards"][i]["legal"] == True):
@@ -60,6 +60,7 @@ def randomIndexResponse():
 
 @app.route("/api/trick-taker/", methods=["POST"])
 def logTrickWinner():
+  print("TRICK TAKER!!")
   data = request.get_json()
   print(data["winnerId"])
   return "OK"
@@ -70,6 +71,15 @@ def logHandScore():
   print(data["scoreChange"])
   print(data["bagsChange"])
   print(data["playerId"])
+  return "OK"
+
+@app.route("/api/final-score/", methods=["POST"])
+def logFinalScore():
+  data = request.get_json()
+  print(data["gameId"])
+  print(data["playerId"])
+  print(data["finalScore"])
+  print(data["winner"])
   return "OK"
 
 
