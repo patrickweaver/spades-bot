@@ -9,7 +9,6 @@ from random import randint
 
 app = Flask(__name__, static_folder='views')
 
-print(os.environ['MONGO_URI'])
 app.config["MONGO_URI"] = os.environ['MONGO_URI']
 mongo = PyMongo(app)
 # - - - - - - - - - - - - - - - - 
@@ -18,11 +17,11 @@ mongo = PyMongo(app)
 
 @app.route("/")
 def home():
-  print(datetime.datetime.now())
-  time = {"request_time": datetime.datetime.now()}
-  times = mongo.db.times
-  time_id = times.insert_one(time).inserted_id
-  print(time_id);
+  #print(datetime.datetime.now())
+  #time = {"request_time": datetime.datetime.now()}
+  #times = mongo.db.times
+  #time_id = times.insert_one(time).inserted_id
+  #print(time_id);
   return render_template('index.html')
 
 @app.route("/api/bid/", methods=["GET"])
@@ -32,18 +31,37 @@ def numberOfSpadesGet():
 @app.route("/api/bid/", methods=["POST"])
 def numberOfSpadesResponse():
   data = request.get_json()
+  bid = False
   if data["strategy"] == "numberOfSpades":
-    #print(data["handCards"])
-    #for d in data:
-    #  print(d);
-    #print("");
-    spades = 0;
+    for d in data:
+      print(d)
+      print(data[d])
+    print("")
+    spades = 0
     for i in range(0, len(data["handCards"])):
-      if (data["handCards"][i]["suitName"] == "spades"):
+      if (int(data["handCards"][i]["value"]) > 39):
         spades += 1
     if spades == 0:
       spades = "Nil"
-  responseJSON = jsonify({"bid": spades})
+    bid = spades
+    
+  # Remove bids that haven't been placed yet
+  for playerBid in ["bidLeftBid", "bidPartnerBid", "bidRightBid"]:
+    if data[playerBid] == 0:
+      print "DELETING! " + playerBid
+      del data[playerBid]
+  
+  # Add all cards to data
+  for card in data["handCards"]:
+    value = card["value"]
+    data["card" + str(value)] = True
+  del data["handCards"]
+  
+  
+  data["bidSelfBid"] = bid
+  bids = mongo.db.bids
+  bid_id = bids.insert_one(data).inserted_id            
+  responseJSON = jsonify({"bid": bid})
   #time.sleep(1)
   return responseJSON
 
