@@ -1,17 +1,28 @@
-import sys, time
+import sys, time, datetime
+import os
 
 from flask import Flask, send_from_directory, jsonify, request, render_template
+
+from flask_pymongo import PyMongo
 
 from random import randint
 
 app = Flask(__name__, static_folder='views')
 
+print(os.environ['MONGO_URI'])
+app.config["MONGO_URI"] = os.environ['MONGO_URI']
+mongo = PyMongo(app)
 # - - - - - - - - - - - - - - - - 
 # Routes
 # - - - - - - - - - - - - - - - - 
 
 @app.route("/")
 def home():
+  print(datetime.datetime.now())
+  time = {"request_time": datetime.datetime.now()}
+  times = mongo.db.times
+  time_id = times.insert_one(time).inserted_id
+  print(time_id);
   return render_template('index.html')
 
 @app.route("/api/bid/", methods=["GET"])
