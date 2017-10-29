@@ -82,7 +82,7 @@ def randomIndexResponse():
       if (data["handCards"][i]["legal"] == True):
         legalCards.append(i)
     randomIndex = legalCards[randint(0,len(legalCards) - 1)]
-    print(data["handCards"][randomIndex]["fullPrintableName"] + ": " + str(randomIndex))
+    #print(data["handCards"][randomIndex]["fullPrintableName"] + ": " + str(randomIndex))
   responseJSON = jsonify({"index": randomIndex})
   #time.sleep(1)
   return responseJSON
