@@ -21,3 +21,4 @@ htmlcov
 *,cover
 
 flask-pymongo-master/
+.python-eggs/
