@@ -6,6 +6,7 @@ from flask import Flask, send_from_directory, jsonify, request, render_template
 from flask_pymongo import PyMongo
 
 from random import randint
+import pprint
 
 app = Flask(__name__, static_folder='views')
 
@@ -94,10 +95,6 @@ def randomIndexResponse():
   # Strategy "random"
   # Randomly pick one of the legal cards
   if data["strategy"] == "random":
-    for d in data:
-      print(d)
-      print(data[d])
-    print("")
     legalCards = []
     for i in range(0, len(data["handCards"])):
       if (data["handCards"][i]["legal"] == True):
@@ -109,7 +106,6 @@ def randomIndexResponse():
   
   # Add card played to data
   data["playSelfPlay"] = data["handCards"][cardIndex]["value"]
-  print("Card pLayed: " + str(data["playSelfPlay"]))
   
   # Add all cards to data
   for card in data["handCards"]:
@@ -134,13 +130,25 @@ def randomIndexResponse():
 
 
 
-
+# - - - - - - - - - - - - -
+# Trick Taker:
+# - - - - - - - - - - - - -
 @app.route("/api/trick-taker/", methods=["POST"])
 def logTrickWinner():
-  print("TRICK TAKER!!")
   data = request.get_json()
-  print(data["winnerId"])
-  print(data["gameId"])
+  for d in data:
+    print(d)
+    print(data[d])
+  print("")
+  updated_plays = mongo.db.plays.update_many({
+    "gameId": data["gameId"],
+    "handNumber": data["handNumber"],
+    "trickNumber": data["trickNumber"]
+  }, 
+  {
+    "$set": {"winnerId": data["winnerId"]}
+  })
+  
   return "OK"
 
 @app.route("/api/hand-score/", methods=["POST"])
