@@ -6,14 +6,18 @@ from flask import Flask, send_from_directory, jsonify, request, render_template
 from flask_pymongo import PyMongo
 
 from random import randint
+import pprint
 
 app = Flask(__name__, static_folder='views')
 
 app.config["MONGO_URI"] = os.environ['MONGO_URI']
 mongo = PyMongo(app)
+
+# - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - 
 # Routes
 # - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - -
 
 @app.route("/")
 def home():
@@ -24,19 +28,24 @@ def home():
   #print(time_id);
   return render_template('index.html')
 
+
+
+# Bid GET placeholder
 @app.route("/api/bid/", methods=["GET"])
 def numberOfSpadesGet():
   return "Use POST"
 
+# - - - - - - - - - - - - -
+# Bot Bid:
+# - - - - - - - - - - - - -
 @app.route("/api/bid/", methods=["POST"])
 def numberOfSpadesResponse():
   data = request.get_json()
   bid = False
+  
+  # Strategy "numberOfSpades"
+  # Bid the number of spades in hand
   if data["strategy"] == "numberOfSpades":
-    for d in data:
-      print(d)
-      print(data[d])
-    print("")
     spades = 0
     for i in range(0, len(data["handCards"])):
       if (int(data["handCards"][i]["value"]) > 39):
@@ -48,7 +57,6 @@ def numberOfSpadesResponse():
   # Remove bids that haven't been placed yet
   for playerBid in ["bidLeftBid", "bidPartnerBid", "bidRightBid"]:
     if data[playerBid] == 0:
-      print "DELETING! " + playerBid
       del data[playerBid]
   
   # Add all cards to data
@@ -57,26 +65,36 @@ def numberOfSpadesResponse():
     data["card" + str(value)] = True
   del data["handCards"]
   
-  
+  # Send bid and data to DB
   data["bidSelfBid"] = bid
   bids = mongo.db.bids
-  bid_id = bids.insert_one(data).inserted_id            
+  bid_id = bids.insert_one(data).inserted_id       
+  
+  # Send response to spades server
   responseJSON = jsonify({"bid": bid})
   #time.sleep(1)
   return responseJSON
 
+
+
+# Play GET placeholder
 @app.route("/api/play/", methods=["GET"])
 def randomGet():
   return "Use POST"
 
+
+
+# - - - - - - - - - - - - -
+# Bot Play:
+# - - - - - - - - - - - - -
 @app.route("/api/play/", methods=["POST"])
 def randomIndexResponse():
   data = request.get_json()
+  cardIndex = False
+  
+  # Strategy "random"
+  # Randomly pick one of the legal cards
   if data["strategy"] == "random":
-    #print(data["handCards"])
-    #for d in data:
-    #  print(d);
-    #print("");
     legalCards = []
     for i in range(0, len(data["handCards"])):
       if (data["handCards"][i]["legal"] == True):
@@ -84,15 +102,53 @@ def randomIndexResponse():
     randomIndex = legalCards[randint(0,len(legalCards) - 1)]
     #print(data["handCards"][randomIndex]["fullPrintableName"] + ": " + str(randomIndex))
   responseJSON = jsonify({"index": randomIndex})
+  cardIndex = randomIndex
+  
+  # Add card played to data
+  data["playSelfPlay"] = data["handCards"][cardIndex]["value"]
+  
+  # Add all cards to data
+  for card in data["handCards"]:
+    value = card["value"]
+    legal = 0
+    if card["legal"]:
+      legal = 1
+    data["card" + str(value)] = legal
+  del data["handCards"]
+  
+
+  # Remove bid order
+  del data["bidSelfOrder"]
+  
+  # Send bid and data to DB
+  plays = mongo.db.plays
+  play_id = plays.insert_one(data).inserted_id 
+  
+  
   #time.sleep(1)
   return responseJSON
 
+
+
+# - - - - - - - - - - - - -
+# Trick Taker:
+# - - - - - - - - - - - - -
 @app.route("/api/trick-taker/", methods=["POST"])
 def logTrickWinner():
-  print("TRICK TAKER!!")
   data = request.get_json()
-  print(data["winnerId"])
-  print(data["gameId"])
+  for d in data:
+    print(d)
+    print(data[d])
+  print("")
+  updated_plays = mongo.db.plays.update_many({
+    "gameId": data["gameId"],
+    "handNumber": data["handNumber"],
+    "trickNumber": data["trickNumber"]
+  }, 
+  {
+    "$set": {"winnerId": data["winnerId"]}
+  })
+  
   return "OK"
 
 @app.route("/api/hand-score/", methods=["POST"])
