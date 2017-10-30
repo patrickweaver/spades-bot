@@ -67,6 +67,8 @@ def numberOfSpadesResponse():
   
   # Send bid and data to DB
   data["bidSelfBid"] = bid
+  if bid == "Nil":
+    data["bidSelfBid"] = 0
   bids = mongo.db.bids
   bid_id = bids.insert_one(data).inserted_id       
   
@@ -136,39 +138,71 @@ def randomIndexResponse():
 @app.route("/api/trick-taker/", methods=["POST"])
 def logTrickWinner():
   data = request.get_json()
-  for d in data:
-    print(d)
-    print(data[d])
-  print("")
-  updated_plays = mongo.db.plays.update_many({
-    "gameId": data["gameId"],
-    "handNumber": data["handNumber"],
-    "trickNumber": data["trickNumber"]
-  }, 
-  {
-    "$set": {"winnerId": data["winnerId"]}
-  })
+  
+  updated_plays = mongo.db.plays.update_many(
+    {
+      "gameId": data["gameId"],
+      "handNumber": data["handNumber"],
+      "trickNumber": data["trickNumber"]
+    }, 
+    {
+      "$set": {"winner": 0}
+    }
+  )
+  
+  winner = mongo.db.plays.update_one(
+    {
+      "gameId": data["gameId"],
+      "handNumber": data["handNumber"],
+      "trickNumber": data["trickNumber"],
+      "playerId": data["winnerId"]
+    }, 
+    {
+      "$set": {"winner": 1}
+    }
+  )
+  
   
   return "OK"
 
 @app.route("/api/hand-score/", methods=["POST"])
 def logHandScore():
   data = request.get_json()
-  print(data["scoreChange"])
-  print(data["bagsChange"])
-  print(data["playerId"])
-  print(data["gameId"])
+  
+  old_data = {
+    "gameId": data["gameId"],
+    "playerId": data["playerId"],
+    "handNumber": data["handNumber"]
+  }
+  
+  updated_data = {
+    "scoreChange": data["scoreChange"],
+    "bagsChange": data["bagsChange"],
+    "tricksTaken": data["tricksTaken"]
+  }
+    
+  updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
+  updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
+  
   return "OK"
 
 @app.route("/api/final-score/", methods=["POST"])
 def logFinalScore():
-  print("FINAL SCORE!!")
   data = request.get_json()
-  print(data["gameId"])
-  print(data["playerId"])
-  print(data["finalScore"])
-  print(data["finalBags"])
-  print(data["winner"])
+  
+  old_data = {
+    "gameId": data["gameId"],
+    "playerId": data["playerId"]
+  }
+  
+  updated_data = {
+    "finalScore": data["finalScore"],
+    "finalBags": data["finalBags"]
+  }  
+  
+  updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
+  updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
+    
   return "OK"
 
 
