@@ -21,11 +21,6 @@ mongo = PyMongo(app)
 
 @app.route("/")
 def home():
-  #print(datetime.datetime.now())
-  #time = {"request_time": datetime.datetime.now()}
-  #times = mongo.db.times
-  #time_id = times.insert_one(time).inserted_id
-  #print(time_id);
   return render_template('index.html')
 
 
@@ -59,7 +54,11 @@ def numberOfSpadesResponse():
     if data[playerBid] == 0:
       del data[playerBid]
   
-  # Add all cards to data
+  # Add all cards to data as False
+  for i in range(1, 53):
+    data["card" + str(i)] = False
+  
+  # Add cards in hand as True
   for card in data["handCards"]:
     value = card["value"]
     data["card" + str(value)] = True
@@ -109,7 +108,11 @@ def randomIndexResponse():
   # Add card played to data
   data["playSelfPlay"] = data["handCards"][cardIndex]["value"]
   
-  # Add all cards to data
+  # Add all cards to data as False
+  for i in range(1, 53):
+    data["card" + str(i)] = False
+  
+  # Add cards in hand as True
   for card in data["handCards"]:
     value = card["value"]
     legal = 0
