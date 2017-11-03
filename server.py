@@ -54,15 +54,16 @@ def numberOfSpadesResponse():
     if data[playerBid] == 0:
       del data[playerBid]
   
-  # Add all cards to data as False
+  # Add all cards to data as 0
   for i in range(1, 53):
-    data["card" + str(i)] = False
+    data["card" + str(i)] = 0
   
-  # Add cards in hand as True
+  # Add cards in hand as 1
   for card in data["handCards"]:
     value = card["value"]
-    data["card" + str(value)] = True
+    data["card" + str(value)] = T1
   del data["handCards"]
+
   
   # Send bid and data to DB
   data["bidSelfBid"] = bid
@@ -108,11 +109,11 @@ def randomIndexResponse():
   # Add card played to data
   data["playSelfPlay"] = data["handCards"][cardIndex]["value"]
   
-  # Add all cards to data as False
+  # Add all cards to data as -1
   for i in range(1, 53):
-    data["card" + str(i)] = False
+    data["card" + str(i)] = -1
   
-  # Add cards in hand as True
+  # Add cards in hand as 0, change legal cards to 1
   for card in data["handCards"]:
     value = card["value"]
     legal = 0
@@ -120,8 +121,8 @@ def randomIndexResponse():
       legal = 1
     data["card" + str(value)] = legal
   del data["handCards"]
-  
 
+  
   # Remove bid order
   del data["bidSelfOrder"]
   
