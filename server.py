@@ -45,16 +45,12 @@ def numberOfSpadesResponse():
     for i in range(0, len(data["handCards"])):
       if (int(data["handCards"][i]["value"]) > 39):
         spades += 1
-    if spades == 0:
-      spades = "Nil"
     bid = spades
   if data["strategy"] == "randFromNumberOfSpades":
     spades = 0
     for i in range(0, len(data["handCards"])):
       if (int(data["handCards"][i]["value"]) > 39):
         spades += 1
-    if spades == 0:
-      spades = "Nil"
     random_number = randint(0, 10) - 4
     placeholder = spades + random_number
     if placeholder < 0:
@@ -79,10 +75,12 @@ def numberOfSpadesResponse():
   
   # Send bid and data to DB
   data["bidSelfBid"] = bid
-  if bid == "Nil":
-    data["bidSelfBid"] = 0
   bids = mongo.db.bids
-  bid_id = bids.insert_one(data).inserted_id       
+  bid_id = bids.insert_one(data).inserted_id  
+  
+  # Translate 0 to "Nil" for front end
+  if bid == 0:
+    bid = "Nil"
   
   # Send response to spades server
   responseJSON = jsonify({"bid": bid})
