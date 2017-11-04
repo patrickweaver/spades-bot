@@ -48,6 +48,18 @@ def numberOfSpadesResponse():
     if spades == 0:
       spades = "Nil"
     bid = spades
+  if data["strategy"] == "randFromNumberOfSpades":
+    spades = 0
+    for i in range(0, len(data["handCards"])):
+      if (int(data["handCards"][i]["value"]) > 39):
+        spades += 1
+    if spades == 0:
+      spades = "Nil"
+    random_number = randint(0, 10) - 4
+    placeholder = spades + random_number
+    if placeholder < 0:
+      placeholder = randint(0, 3)
+    bid = placeholder
     
   # Remove bids that haven't been placed yet
   for playerBid in ["bidLeftBid", "bidPartnerBid", "bidRightBid"]:
@@ -61,7 +73,7 @@ def numberOfSpadesResponse():
   # Add cards in hand as 1
   for card in data["handCards"]:
     value = card["value"]
-    data["card" + str(value)] = T1
+    data["card" + str(value)] = 1
   del data["handCards"]
 
   
