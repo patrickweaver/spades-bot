@@ -1,6 +1,8 @@
 import sys, time, datetime
 import os
 
+import neural_net
+
 from flask import Flask, send_from_directory, jsonify, request, render_template
 
 from flask_pymongo import PyMongo
@@ -22,6 +24,11 @@ mongo = PyMongo(app)
 @app.route("/")
 def home():
   return render_template('index.html')
+
+@app.route("/train")
+def train():
+  neural_net.test()
+  return "OK"
 
 
 
@@ -45,17 +52,9 @@ def numberOfSpadesResponse():
     for i in range(0, len(data["handCards"])):
       if (int(data["handCards"][i]["value"]) > 39):
         spades += 1
+    if spades == 0:
+      spades = "Nil"
     bid = spades
-  if data["strategy"] == "randFromNumberOfSpades":
-    spades = 0
-    for i in range(0, len(data["handCards"])):
-      if (int(data["handCards"][i]["value"]) > 39):
-        spades += 1
-    random_number = randint(0, 10) - 4
-    placeholder = spades + random_number
-    if placeholder < 0:
-      placeholder = randint(0, 3)
-    bid = placeholder
     
   # Remove bids that haven't been placed yet
   for playerBid in ["bidLeftBid", "bidPartnerBid", "bidRightBid"]:
@@ -69,18 +68,16 @@ def numberOfSpadesResponse():
   # Add cards in hand as 1
   for card in data["handCards"]:
     value = card["value"]
-    data["card" + str(value)] = 1
+    data["card" + str(value)] = T1
   del data["handCards"]
 
   
   # Send bid and data to DB
   data["bidSelfBid"] = bid
+  if bid == "Nil":
+    data["bidSelfBid"] = 0
   bids = mongo.db.bids
-  bid_id = bids.insert_one(data).inserted_id  
-  
-  # Translate 0 to "Nil" for front end
-  if bid == 0:
-    bid = "Nil"
+  bid_id = bids.insert_one(data).inserted_id       
   
   # Send response to spades server
   responseJSON = jsonify({"bid": bid})
@@ -227,4 +224,4 @@ def send_static(path):
   return send_from_directory('public', path)
 
 if __name__ == "__main__":
-  app.run()
+  app.run(host=os.environ['HOST'], port=os.environ['PORT'])
