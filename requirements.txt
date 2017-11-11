@@ -1,1 +1,4 @@
 Flask
+flask-pymongo
+numpy
+scipy
