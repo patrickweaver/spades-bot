@@ -1,18 +1,19 @@
 FROM ubuntu:16.04
 
+RUN apt-get -yqq update
+RUN apt-get -yqq install python-pip python-dev
+
+
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN apt-get update
-RUN apt-get install -y python-pip
+# Bundle app source
+ADD . /usr/src/app
 
 # Install app dependencies
 ADD requirements.txt /usr/src/app
 RUN pip install -r requirements.txt
 
-# Bundle app source
-COPY . /usr/src/app
-
-EXPOSE 3000
-CMD ["python", "server.py"]
+EXPOSE 5000
+CMD ["python", "./server.py"]
