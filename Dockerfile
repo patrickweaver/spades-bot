@@ -16,5 +16,4 @@ ADD requirements.txt /usr/src/app
 RUN pip install -r requirements.txt
 
 EXPOSE 5000
-EXPOSE 80
 CMD ["python", "./server.py"]

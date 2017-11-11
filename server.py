@@ -44,7 +44,7 @@ def numberOfSpadesGet():
 def numberOfSpadesResponse():
   data = request.get_json()
   bid = False
-  """
+
   # Strategy "numberOfSpades"
   # Bid the number of spades in hand
   if data["strategy"] == "numberOfSpades":
@@ -68,7 +68,7 @@ def numberOfSpadesResponse():
   # Add cards in hand as 1
   for card in data["handCards"]:
     value = card["value"]
-    data["card" + str(value)] = T1
+    data["card" + str(value)] = 1
   del data["handCards"]
 
 
@@ -78,8 +78,7 @@ def numberOfSpadesResponse():
     data["bidSelfBid"] = 0
   bids = mongo.db.bids
   bid_id = bids.insert_one(data).inserted_id
-  """
-  bid = 3;
+
   # Send response to spades server
   responseJSON = jsonify({"bid": bid})
   #time.sleep(1)
