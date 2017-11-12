@@ -92,3 +92,71 @@ output_nodes = 14
 learning_rate = 0.3
 
 n = neuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_rate)
+
+def train_from_csv():
+
+    data_file = open("bids1.csv", "r")
+    data_list = data_file.readlines()
+    data_file.close()
+
+
+    # good_data_list holds successful hands where the team scored more than 5 points
+    a = False
+    good_data_list = []
+    print("LENGTH BEFORE:")
+    print(len(data_list))
+
+    for bid in data_list:
+        bid_list = bid.split(",")
+
+        if len(bid_list) > 71:
+            if bid_list[67] != "scoreChange" and bid_list[67] != "" and bid_list[68] != "":
+                scoreChange = int(bid_list[67])
+                bagsChange = int(bid_list[68])
+                #print(i)
+                #print(i < 7)
+                #print("\n")
+                if scoreChange > 7 and bagsChange < 3:
+                    good_data_list.append(bid_list)
+    print("LENGTH AFTER:")
+    print(len(good_data_list))
+
+    for bid_data in good_data_list:
+
+        useful_values = []
+        # Get actual bid:
+        # Will be useful_values[0]
+        useful_values.append(bid_data[58])
+
+        # Get all cards in hand data
+        # Will be useful_values[1:53]
+        for i in range(1, 53):
+            useful_values.append(bid_data[i])
+        #print(useful_values)
+
+        # Normalize all data to 0.01 to 1 scale
+        scaled_input = (numpy.asfarray(useful_values[1:53]) / 1.0 * 0.99) + 0.01
+        #print(scaled_input)
+
+
+        # output nodes is 14
+        onodes = 14
+        targets = numpy.zeros(onodes) + 0.01
+        targets[int(useful_values[0])] = 0.99
+
+        #print(targets)
+
+        n.train(scaled_input, targets)
+    return "Trained"
+
+def get_bid(input_data):
+    input_dataa = (numpy.asfarray(input_data[1:53]) / 1.0 * 0.99) + 0.01
+    outputs = n.query(input_dataa)
+    bid = 0
+    bid_confidence = 0
+    for i in range(0, 14):
+        print(str(i) + ":\t" + str(outputs[i]))
+        if outputs[i] > bid_confidence:
+            bid = i
+            bid_confidence = outputs[i]
+    return bid

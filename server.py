@@ -27,9 +27,7 @@ def home():
 
 @app.route("/train")
 def train():
-  neural_net.test()
-  return "OK"
-
+  return neural_net.train_from_csv()
 
 
 # Bid GET placeholder
@@ -56,6 +54,7 @@ def numberOfSpadesResponse():
       spades = "Nil"
     bid = spades
 
+
   # Remove bids that haven't been placed yet
   for playerBid in ["bidLeftBid", "bidPartnerBid", "bidRightBid"]:
     if data[playerBid] == 0:
@@ -71,14 +70,23 @@ def numberOfSpadesResponse():
     data["card" + str(value)] = 1
   del data["handCards"]
 
+  if bid:
+    # Send bid and data to DB
+    data["bidSelfBid"] = bid
+    if bid == "Nil":
+      data["bidSelfBid"] = 0
+    bids = mongo.db.bids
+    bid_id = bids.insert_one(data).inserted_id
 
-  # Send bid and data to DB
-  data["bidSelfBid"] = bid
-  if bid == "Nil":
-    data["bidSelfBid"] = 0
-  bids = mongo.db.bids
-  bid_id = bids.insert_one(data).inserted_id
+  # This and the other strategy question should really be above but the nn reqires that the db changes have been done.
+  if data["strategy"] == "nn":
+      input_data = [0]
+      for i in range(1, 53):
+          input_data.append(data["card" + str(i)])
+      bid = neural_net.get_bid(input_data)
 
+  if bid == 0:
+      bid = "Nil"
   # Send response to spades server
   responseJSON = jsonify({"bid": bid})
   #time.sleep(1)
