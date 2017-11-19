@@ -13,6 +13,7 @@ import pprint
 app = Flask(__name__, static_folder='views')
 
 app.config["MONGO_URI"] = os.environ['MONGO_URI']
+learning_version = os.environ["LEARNING_VERSION"] or ""
 mongo = PyMongo(app)
 
 # - - - - - - - - - - - - - - - -
@@ -70,13 +71,9 @@ def numberOfSpadesResponse():
     data["card" + str(value)] = 1
   del data["handCards"]
 
-  if bid:
-    # Send bid and data to DB
-    data["bidSelfBid"] = bid
-    if bid == "Nil":
-      data["bidSelfBid"] = 0
-    bids = mongo.db.bids
-    bid_id = bids.insert_one(data).inserted_id
+
+
+  data["learningVersion"] = learning_version
 
   # This and the other strategy question should really be above but the nn reqires that the db changes have been done.
   if data["strategy"] == "nn":
@@ -85,8 +82,20 @@ def numberOfSpadesResponse():
           input_data.append(data["card" + str(i)])
       bid = neural_net.get_bid(input_data)
 
+  # Send bid and data to DB
+  data["bidSelfBid"] = bid
+  if bid == "Nil":
+    data["bidSelfBid"] = 0
+
+  # Send to DB:
+  bids = mongo.db.bids
+  bid_id = bids.insert_one(data).inserted_id
+  print("!! Bid ID:")
+  print(bid_id)
+
   if bid == 0:
       bid = "Nil"
+
   # Send response to spades server
   responseJSON = jsonify({"bid": bid})
   #time.sleep(1)

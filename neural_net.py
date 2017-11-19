@@ -159,4 +159,6 @@ def get_bid(input_data):
         if outputs[i] > bid_confidence:
             bid = i
             bid_confidence = outputs[i]
+    if bid > 1:
+        bid -= 1
     return bid
