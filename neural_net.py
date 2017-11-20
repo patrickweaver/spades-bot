@@ -96,7 +96,7 @@ n = neuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_rate)
 
 def train_from_csv():
 
-    data_file = open("bids1.csv", "r")
+    data_file = open("bids.csv", "r")
     data_list = data_file.readlines()
     data_file.close()
 
