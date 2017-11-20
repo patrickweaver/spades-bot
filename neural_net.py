@@ -3,6 +3,7 @@
 
 import numpy
 import scipy.special
+import random
 
 
 class neuralNetwork:
@@ -159,6 +160,13 @@ def get_bid(input_data):
         if outputs[i] > bid_confidence:
             bid = i
             bid_confidence = outputs[i]
-    if bid > 1:
-        bid -= 1
+
+    # Make NN output more fuzzy to generate better data:
+    fuzzes = [-4, -3, -3, -2, -2, -2, -1, -1, -1, -1, -4, -3, -3, -2, -2, -2, -1, -1, -1, -1, -4, -3, -3, -2, -2, -2, -1, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4]
+    fuzzes_2 = [0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3]
+    adj = fuzzes[random.randint(0, len(fuzzes) - 1)]
+    bid += adj
+    if bid < 0:
+        bid = fuzzes_2[random.randint(0, len(fuzzes_2) - 1)]
+
     return bid
