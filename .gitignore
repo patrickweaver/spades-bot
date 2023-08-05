@@ -24,3 +24,5 @@ flask-pymongo-master/
 .python-eggs/
 
 secrets.txt
+
+spades-bot-venv

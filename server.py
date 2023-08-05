@@ -5,16 +5,16 @@ import neural_net
 
 from flask import Flask, send_from_directory, jsonify, request, render_template
 
-from flask_pymongo import PyMongo
+# from flask_pymongo import PyMongo
 
 from random import randint
 import pprint
 
 app = Flask(__name__, static_folder='views')
 
-app.config["MONGO_URI"] = os.environ['MONGO_URI']
-learning_version = os.environ["LEARNING_VERSION"] or ""
-mongo = PyMongo(app)
+# app.config["MONGO_URI"] = os.environ['MONGO_URI']
+# learning_version = os.environ["LEARNING_VERSION"] or ""
+# mongo = PyMongo(app)
 
 # - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - -
@@ -88,8 +88,9 @@ def numberOfSpadesResponse():
     data["bidSelfBid"] = 0
 
   # Send to DB:
-  bids = mongo.db.bids
-  bid_id = bids.insert_one(data).inserted_id
+  # bids = mongo.db.bids
+  # bid_id = bids.insert_one(data).inserted_id
+  bid_id = 0
   print("!! Bid ID:")
   print(bid_id)
 
@@ -151,8 +152,9 @@ def randomIndexResponse():
   del data["bidSelfOrder"]
 
   # Send bid and data to DB
-  plays = mongo.db.plays
-  play_id = plays.insert_one(data).inserted_id
+  # plays = mongo.db.plays
+  # play_id = plays.insert_one(data).inserted_id
+  play_id = 0
 
 
   #time.sleep(1)
@@ -167,28 +169,28 @@ def randomIndexResponse():
 def logTrickWinner():
   data = request.get_json()
 
-  updated_plays = mongo.db.plays.update_many(
-    {
-      "gameId": data["gameId"],
-      "handNumber": data["handNumber"],
-      "trickNumber": data["trickNumber"]
-    },
-    {
-      "$set": {"winner": 0}
-    }
-  )
+  # updated_plays = mongo.db.plays.update_many(
+  #   {
+  #     "gameId": data["gameId"],
+  #     "handNumber": data["handNumber"],
+  #     "trickNumber": data["trickNumber"]
+  #   },
+  #   {
+  #     "$set": {"winner": 0}
+  #   }
+  # )
 
-  winner = mongo.db.plays.update_one(
-    {
-      "gameId": data["gameId"],
-      "handNumber": data["handNumber"],
-      "trickNumber": data["trickNumber"],
-      "playerId": data["winnerId"]
-    },
-    {
-      "$set": {"winner": 1}
-    }
-  )
+  # winner = mongo.db.plays.update_one(
+  #   {
+  #     "gameId": data["gameId"],
+  #     "handNumber": data["handNumber"],
+  #     "trickNumber": data["trickNumber"],
+  #     "playerId": data["winnerId"]
+  #   },
+  #   {
+  #     "$set": {"winner": 1}
+  #   }
+  # )
 
 
   return "OK"
@@ -209,8 +211,8 @@ def logHandScore():
     "tricksTaken": data["tricksTaken"]
   }
 
-  updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
-  updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
+  # updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
+  # updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
 
   return "OK"
 
@@ -228,8 +230,8 @@ def logFinalScore():
     "finalBags": data["finalBags"]
   }
 
-  updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
-  updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
+  # updated_bids = mongo.db.bids.update_many(old_data, {"$set": updated_data})
+  # updated_plays = mongo.db.plays.update_many(old_data, {"$set": updated_data})
 
   return "OK"
 
